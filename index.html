@@ -269,19 +269,38 @@
         }
 
         .download-btn {
-            background: transparent;
-            color: #ffffff;
-            border: 1px solid #333333;
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+            color: #000000;
+            border: none;
             margin-top: 1rem;
             text-transform: none;
             letter-spacing: 0;
-            font-weight: 600;
+            font-weight: 700;
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .download-btn:hover::before {
+            left: 100%;
         }
 
         .download-btn:hover:not(:disabled) {
-            background: #1a1a1a;
-            border-color: #555555;
-            color: #ffffff;
+            background: linear-gradient(135deg, #00ff88 0%, #00aa55 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0, 255, 136, 0.4);
+            color: #000000;
         }
 
         .error {
@@ -310,23 +329,148 @@
 
         @media (max-width: 768px) {
             .container {
-                padding: 1rem;
+                padding: 1rem 0.5rem;
+                justify-content: flex-start;
+                padding-top: 2rem;
             }
 
-            .main-card {
-                padding: 2rem 1.5rem;
-            }
-
-            .media-container {
-                grid-template-columns: 1fr;
+            .header {
+                margin-bottom: 2rem;
             }
 
             .logo {
                 font-size: 3rem;
+                letter-spacing: -2px;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .main-card {
+                padding: 2rem 1.5rem;
+                margin: 0;
+                border-radius: 12px;
+                max-width: 100%;
             }
 
             .upload-zone {
-                padding: 3rem 1rem;
+                padding: 2rem 1rem;
+                border-radius: 8px;
+            }
+
+            .upload-icon {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .upload-text {
+                font-size: 1.1rem;
+                margin-bottom: 0.3rem;
+            }
+
+            .upload-subtext {
+                font-size: 0.8rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .btn {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.85rem;
+                margin: 0.2rem;
+                display: block;
+                width: calc(50% - 0.4rem);
+                display: inline-block;
+            }
+
+            .media-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                margin: 1.5rem 0;
+            }
+
+            .media-card {
+                padding: 0.8rem;
+            }
+
+            .media-title {
+                font-size: 0.7rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .media-wrapper {
+                height: 200px;
+            }
+
+            .action-btn {
+                padding: 0.9rem 1.5rem;
+                font-size: 0.9rem;
+                margin-top: 1.5rem;
+            }
+
+            .download-btn {
+                padding: 0.9rem 1.5rem;
+                font-size: 0.9rem;
+            }
+
+            .video-info {
+                padding: 0.8rem;
+                font-size: 0.75rem;
+            }
+
+            .progress-text {
+                font-size: 0.75rem;
+            }
+
+            .error, .warning {
+                padding: 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .loading-text {
+                font-size: 0.75rem;
+            }
+
+            .spinner {
+                width: 25px;
+                height: 25px;
+            }
+
+            .info-row {
+                margin-bottom: 0.3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0.5rem;
+            }
+
+            .main-card {
+                padding: 1.5rem 1rem;
+            }
+
+            .logo {
+                font-size: 2.5rem;
+            }
+
+            .upload-zone {
+                padding: 1.5rem 0.8rem;
+            }
+
+            .btn {
+                width: 100%;
+                margin: 0.25rem 0;
+                display: block;
+            }
+
+            .media-wrapper {
+                height: 180px;
+            }
+
+            .action-btn, .download-btn {
+                padding: 0.8rem 1rem;
+                font-size: 0.85rem;
             }
         }
 
@@ -443,7 +587,7 @@
                 </button>
 
                 <button class="download-btn" id="downloadBtn" style="display:none;">
-                    Download Result
+                    📥 Download Result
                 </button>
             </div>
         </div>
@@ -591,7 +735,7 @@
             hideProgress();
         };
 
-        const extractFrames = async (videoFile, frameRate = 10) => {
+        const extractFrames = async (videoFile, frameRate = 5) => {
             return new Promise((resolve) => {
                 const video = document.createElement('video');
                 const canvas = document.createElement('canvas');
@@ -599,11 +743,11 @@
                 const frames = [];
 
                 video.onloadedmetadata = () => {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
+                    canvas.width = Math.min(video.videoWidth, 640);
+                    canvas.height = Math.min(video.videoHeight, 480);
 
-                    const duration = video.duration;
-                    const interval = 1 / frameRate;
+                    const duration = Math.min(video.duration, 10);
+                    const interval = Math.max(1 / frameRate, 0.5);
                     let currentTime = 0;
 
                     const captureFrame = () => {
@@ -619,7 +763,7 @@
                                 frames.push({ blob, time: currentTime });
                                 currentTime += interval;
                                 captureFrame();
-                            }, 'image/png');
+                            }, 'image/jpeg', 0.8);
                         };
                     };
 
@@ -633,37 +777,42 @@
         const processFrames = async (frames) => {
             const processedFrames = [];
             const total = frames.length;
+            const batchSize = 3;
 
-            for (let i = 0; i < frames.length; i++) {
-                const frame = frames[i];
-                updateProgress((i / total) * 90, `Processing frame ${i + 1} of ${total}...`);
+            for (let i = 0; i < frames.length; i += batchSize) {
+                const batch = frames.slice(i, i + batchSize);
+                const batchPromises = batch.map(async (frame, index) => {
+                    const actualIndex = i + index;
+                    try {
+                        const formData = new FormData();
+                        formData.append('image_file', frame.blob);
+                        formData.append('size', 'auto');
 
-                try {
-                    const formData = new FormData();
-                    formData.append('image_file', frame.blob);
-                    formData.append('size', 'auto');
+                        const response = await fetch('https://api.remove.bg/v1.0/removebg', {
+                            method: 'POST',
+                            headers: { 'X-Api-Key': 'Rvsg1FpEa98CtutmkQdntSiw' },
+                            body: formData
+                        });
 
-                    const response = await fetch('https://api.remove.bg/v1.0/removebg', {
-                        method: 'POST',
-                        headers: { 'X-Api-Key': 'Rvsg1FpEa98CtutmkQdntSiw' },
-                        body: formData
-                    });
+                        if (!response.ok) {
+                            throw new Error(`Frame ${actualIndex + 1} failed: ${response.status}`);
+                        }
 
-                    if (!response.ok) {
-                        throw new Error(`Frame ${i + 1} failed: ${response.status}`);
+                        const processedBlob = await response.blob();
+                        return { blob: processedBlob, time: frame.time, index: actualIndex };
+
+                    } catch (error) {
+                        return { blob: frame.blob, time: frame.time, index: actualIndex };
                     }
+                });
 
-                    const processedBlob = await response.blob();
-                    processedFrames.push({ blob: processedBlob, time: frame.time });
-
-                } catch (error) {
-                    showError(`Failed to process frame ${i + 1}: ${error.message}`);
-                    processedFrames.push({ blob: frame.blob, time: frame.time });
-                }
-
-                await new Promise(resolve => setTimeout(resolve, 100));
+                const batchResults = await Promise.all(batchPromises);
+                processedFrames.push(...batchResults);
+                
+                updateProgress(((i + batchSize) / total) * 90, `Processing batch ${Math.floor(i/batchSize) + 1}...`);
             }
 
+            processedFrames.sort((a, b) => a.index - b.index);
             return processedFrames;
         };
 
@@ -725,7 +874,7 @@
             try {
                 if (isVideo) {
                     updateProgress(10, 'Extracting frames...');
-                    const frames = await extractFrames(currentFile, 10);
+                    const frames = await extractFrames(currentFile, 5);
                     
                     updateProgress(20, 'Processing frames...');
                     const processedFrames = await processFrames(frames);
